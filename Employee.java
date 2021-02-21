@@ -19,6 +19,8 @@ try{
         break;
         case 3:
         c.deleteEmployee();
+        case 4:
+        c.sumSalaryEmployee();
         default:
         System.out.println();
         break;
@@ -37,24 +39,32 @@ class crud{
     private int Salary;
     private String Position;
   public void selectEmployee(){
-      /*We can select table Employee*/
       try{
         database databaseconncet= new database("jdbc:postgresql://localhost:5432/Javaass5","postgres","1234");
         Connection con= databaseconncet.getConnection();
-        Scanner input= new Scanner(System.in);
         System.out.println("Enter  Employee id:");
+        Scanner input= new Scanner(System.in);
         int inputid= input.nextInt();
         String sql="SELECT * FROM Employee WHERE Employee_id = ? ; ";
-        PreparedStatement stmt= con.prepareStatement(sql);
-        stmt.setInt(2, inputid);
-        System.out.println(sql);
+        PreparedStatement stmt= con.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+        stmt.setInt(1, inputid);
+        ResultSet rs = stmt.executeQuery();
+        if(rs.next()==false){
+            System.out.println("Table do not have this id");
+        }
+        else{
+            rs.previous();
+        while (rs.next()){
+        System.out.println(rs.getInt("Employee_id") + " " + rs.getString("FName") + " " + rs.getString("LName")+" "+rs.getInt(Salary)+" "+ rs.getString(Position));
       }
+    }
+    databaseconncet.closeConnection(con, stmt);
+}
       catch(Exception e){
         System.out.println(e);
-    }
+    } 
   }
     public void updateEmployee(){
-        /*We can update table Employee*/
         try{
         database databaseconncet= new database("jdbc:postgresql://localhost:5432/Javaass5","postgres","1234");
         Connection con= databaseconncet.getConnection();
@@ -81,7 +91,6 @@ class crud{
         }
     }
     public void deleteEmployee(){
-        /*We can delete table Employee*/
         try{
         database databaseconncet= new database("jdbc:postgresql://localhost:5432/Javaass5","postgres","1234");
         Connection con= databaseconncet.getConnection();
@@ -106,14 +115,19 @@ class crud{
     }
     public void sumSalaryEmployee(){
         try{
-            database databaseconncet= new database("jdbc:postgresql://localhost:5432/Javaass5","postgres","1234");
-            Connection con= databaseconncet.getConnection();
-            String sql="SELECT SUM(Salary) FROM Employee;";
-            PreparedStatement stmt= con.prepareStatement(sql);
-            System.out.println();
+          database databaseconncet= new database("jdbc:postgresql://localhost:5432/Javaass5","postgres","1234");
+          Connection con= databaseconncet.getConnection();
+          String sql="SELECT SUM(Salary) FROM Employee";
+          PreparedStatement stmt= con.prepareStatement(sql);
+          ResultSet rs = stmt.executeQuery();
+          while (rs.next()){
+          System.out.println(rs.getInt("Employee_id") + " " + rs.getString("FName") + " " + rs.getString("LName")+" "+rs.getInt(Salary)+" "+ rs.getString(Position));
     }
-    catch(Exception e){
-        System.out.println(e);
+      databaseconncet.closeConnection(con, stmt);
+  }
+        catch(Exception e){
+          System.out.println(e);
+      } 
     }
 }
 class database{
@@ -128,10 +142,8 @@ class database{
     }
     public Connection getConnection() throws SQLException, ClassNotFoundException {
         Connection con=null;
-        Statement stmt = null;
         Class.forName("org.postgresql.Driver");
         con = DriverManager.getConnection(url, username, password);
-        stmt = con.createStatement();
         System.out.println("The connection is established" );
         return con;
     
@@ -146,4 +158,4 @@ class database{
             throwables.printStackTrace();
         }
     }
-} 
+    } 
