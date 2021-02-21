@@ -90,7 +90,7 @@ class crud{
         int inputid= input.nextInt();
         String sql="DELETE FROM Employee WHERE Employee_id = ?; ";
         PreparedStatement stmt= con.prepareStatement(sql);
-        stmt.setInt(2, inputid);
+        stmt.setInt(1, inputid);
         int x = stmt.executeUpdate();
         if(x>0){
             System.out.println("Delete passed successfully");  
